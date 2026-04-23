@@ -1,6 +1,5 @@
 package com.sarthak.projects.codepilot_ai.entity;
 
-import com.sarthak.projects.codepilot_ai.entity.enums.PreviewStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
@@ -10,15 +9,13 @@ import java.time.Instant;
 @Getter
 @Setter
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class Preview {
+public class UsageLog {
     Long id;
+    User user;
     Project project;
-    String namespace;
-    String podName;
-    String previewUrl;
-
-    PreviewStatus status;
-    Instant startedAt;
-    Instant endedAt;
+    String action;
+    Integer tokensUsed;
+    Integer durationMs;
+    String metadata;
     Instant createdAt;
 }

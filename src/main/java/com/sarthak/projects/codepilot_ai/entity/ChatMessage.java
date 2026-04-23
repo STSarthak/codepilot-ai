@@ -1,6 +1,6 @@
 package com.sarthak.projects.codepilot_ai.entity;
 
-import com.sarthak.projects.codepilot_ai.entity.enums.PreviewStatus;
+import com.sarthak.projects.codepilot_ai.entity.enums.MessageRole;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
@@ -10,15 +10,12 @@ import java.time.Instant;
 @Getter
 @Setter
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class Preview {
+public class ChatMessage {
     Long id;
-    Project project;
-    String namespace;
-    String podName;
-    String previewUrl;
-
-    PreviewStatus status;
-    Instant startedAt;
-    Instant endedAt;
+    ChatSession chatSession;
+    String content;
+    MessageRole role;
+    String toolCalls;
+    Integer tokenUsed;
     Instant createdAt;
 }
