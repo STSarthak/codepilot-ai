@@ -1,4 +1,4 @@
-package com.sarthak.projects.codepilot_ai.entity.enums;
+package com.sarthak.projects.codepilot_ai.enums;
 
 public enum MessageRole {
     USER,

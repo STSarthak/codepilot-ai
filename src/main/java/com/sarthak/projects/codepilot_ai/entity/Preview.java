@@ -1,6 +1,6 @@
 package com.sarthak.projects.codepilot_ai.entity;
 
-import com.sarthak.projects.codepilot_ai.entity.enums.PreviewStatus;
+import com.sarthak.projects.codepilot_ai.enums.PreviewStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
