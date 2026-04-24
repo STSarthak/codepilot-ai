@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    AuthService authService;
-    UserService userService;
+    private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(SignupRequest request){
@@ -34,6 +34,6 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getProfile(){
         Long userId = 1L;
-        return ResponseEntity.ok(userService.getProfile (userId));
+        return ResponseEntity.ok(userService.getProfile(userId));
     }
 }
