@@ -30,7 +30,7 @@ public class ProjectContoller {
         return ResponseEntity.ok(projectService.getProjectById(id,userId));
     }
 
-    @PutMapping
+    @PostMapping
     public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest request){
         Long userId = 1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request,userId));
