@@ -21,7 +21,7 @@ public class ProjectMemberController {
     @GetMapping
     public ResponseEntity<List<MemberResponse>> getProjectMember(@PathVariable Long projectId){
         Long userId = 1L;
-        return ResponseEntity.ok(projectMemberService.getProjectMember(projectId, userId));
+        return ResponseEntity.ok(projectMemberService.getProjectMembers(projectId, userId));
     }
 
     @PostMapping
@@ -40,15 +40,16 @@ public class ProjectMemberController {
             @PathVariable Long memberId
     ){
         Long userId = 1L;
-        return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request));
+        return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, userId, request));
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> deleteProjectMember(
+    public ResponseEntity<Void> removeProjectMember(
             @PathVariable Long projectId,
             @PathVariable Long memberId
     ){
         Long userId = 1L;
-        return ResponseEntity.ok(projectMemberService.deleteProjectMember(projectId, memberId));
+        projectMemberService.removeProjectMember(projectId, memberId, userId);
+        return ResponseEntity.noContent().build();
     }
 }
