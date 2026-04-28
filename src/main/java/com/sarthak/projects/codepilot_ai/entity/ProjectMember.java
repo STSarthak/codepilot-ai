@@ -29,7 +29,7 @@ public class ProjectMember {
     User user;
 
     @Column(nullable = false)
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     ProjectRole projectRole;
 
     Instant invtedAt;

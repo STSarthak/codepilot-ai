@@ -4,7 +4,12 @@ import com.sarthak.projects.codepilot_ai.dto.project.ProjectRequest;
 import com.sarthak.projects.codepilot_ai.dto.project.ProjectResponse;
 import com.sarthak.projects.codepilot_ai.dto.project.ProjectSummaryResponse;
 import com.sarthak.projects.codepilot_ai.entity.Project;
+import com.sarthak.projects.codepilot_ai.entity.ProjectMember;
+import com.sarthak.projects.codepilot_ai.entity.ProjectMemberId;
 import com.sarthak.projects.codepilot_ai.entity.User;
+import com.sarthak.projects.codepilot_ai.enums.ProjectRole;
+import com.sarthak.projects.codepilot_ai.error.ResourceNotFoundException;
+import com.sarthak.projects.codepilot_ai.repository.ProjectMemberRepository;
 import com.sarthak.projects.codepilot_ai.repository.ProjectRepository;
 import com.sarthak.projects.codepilot_ai.repository.UserRepository;
 import com.sarthak.projects.codepilot_ai.service.ProjectService;
@@ -27,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectRepository projectRepository;
     UserRepository userRepository;
     ProjectMapper projectMapper;
+    ProjectMemberRepository projectMemberRepository;
 
     @Override
     public List<ProjectSummaryResponse> getUserProject(Long userId) {
@@ -45,15 +51,27 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse createProject(ProjectRequest request, Long userId) {
 
-        User owner = userRepository.findById(userId).orElseThrow();
+        User owner = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User", userId.toString())
+        );
 
         Project project = Project.builder()
                         .name(request.name())
-                        .owner(owner)
                         .isPublic(false)
                         .build();
-
         project = projectRepository.save(project);
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), owner.getId());
+        ProjectMember projectMember = ProjectMember.builder()
+                .projectRole(ProjectRole.OWNER)
+                .user(owner)
+                .project(project)
+                .invtedAt(Instant.now())
+                .acceptedAt(Instant.now())
+                .id(projectMemberId)
+                .build();
+        projectMemberRepository.save(projectMember);
+
         return projectMapper.toProjectResponse(project);
     }
 
@@ -70,9 +88,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void softDelete(Long id, Long userId) {
         Project project = getAccessibleProjectById(id,userId);
-        if(!project.getOwner().getId().equals(userId)){
-            throw new RuntimeException("You are not allowed to delete");
-        }
+
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
     }
