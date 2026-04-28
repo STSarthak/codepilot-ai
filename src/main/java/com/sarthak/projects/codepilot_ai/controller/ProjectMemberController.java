@@ -4,6 +4,7 @@ import com.sarthak.projects.codepilot_ai.dto.member.InviteMemberRequest;
 import com.sarthak.projects.codepilot_ai.dto.member.MemberResponse;
 import com.sarthak.projects.codepilot_ai.dto.member.UpdateMemberRoleRequest;
 import com.sarthak.projects.codepilot_ai.service.ProjectMemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class ProjectMemberController {
     @PostMapping
     public ResponseEntity<MemberResponse> inviteMember(
             @PathVariable Long projectId,
-            @RequestBody InviteMemberRequest request
+            @RequestBody @Valid InviteMemberRequest request
     ){
         Long userId = 1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(projectMemberService.inviteMember(projectId, request, userId));
@@ -36,7 +37,7 @@ public class ProjectMemberController {
     @PatchMapping("/{memberId}")
     public ResponseEntity<MemberResponse> updateMemberRole(
             @PathVariable Long projectId,
-            @RequestBody UpdateMemberRoleRequest request,
+            @RequestBody @Valid UpdateMemberRoleRequest request,
             @PathVariable Long memberId
     ){
         Long userId = 1L;
