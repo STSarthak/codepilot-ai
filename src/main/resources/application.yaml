@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: codepilot-ai
+  ai:
+    openai:
+      api-key: ${OPENAPI_KEY}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+      chat:
+        options:
+          model: gemini-2.5-flash
+          temperature: 0.0
+
 
   datasource:
     url: jdbc:postgresql://localhost:9000/testDB?options=-c TimeZone=Asia/Kolkata
