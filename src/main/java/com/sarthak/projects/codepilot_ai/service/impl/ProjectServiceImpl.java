@@ -8,6 +8,7 @@ import com.sarthak.projects.codepilot_ai.entity.ProjectMember;
 import com.sarthak.projects.codepilot_ai.entity.ProjectMemberId;
 import com.sarthak.projects.codepilot_ai.entity.User;
 import com.sarthak.projects.codepilot_ai.enums.ProjectRole;
+import com.sarthak.projects.codepilot_ai.error.BadRequestException;
 import com.sarthak.projects.codepilot_ai.error.ResourceNotFoundException;
 import com.sarthak.projects.codepilot_ai.repository.ProjectMemberRepository;
 import com.sarthak.projects.codepilot_ai.repository.ProjectRepository;
@@ -94,6 +95,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project getAccessibleProjectById(Long id, Long userId){
-        return projectRepository.findUserProjectById(userId,id).orElseThrow();
+        return projectRepository.findUserProjectById(userId,id).orElseThrow(() -> new BadRequestException("Not found"));
     }
 }
