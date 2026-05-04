@@ -23,3 +23,6 @@ spring:
         format-sql: true
         jdbc:
           time_zone: Asia/Kolkata
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

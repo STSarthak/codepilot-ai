@@ -15,38 +15,33 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/projects")
-public class ProjectContoller {
+public class ProjectController {
 
     private final ProjectService projectService;
 
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProject(){
-        Long userId = 1L;
-        return ResponseEntity.ok(projectService.getUserProject(userId));
+        return ResponseEntity.ok(projectService.getUserProject());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Long id){
-        Long userId = 1L;
-        return ResponseEntity.ok(projectService.getProjectById(id,userId));
+        return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request){
-        Long userId = 1L;
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request,userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long id, @RequestBody @Valid ProjectRequest request){
-        Long userId = 1L;
-        return ResponseEntity.ok(projectService.updateProject(id, request, userId));
+        return ResponseEntity.ok(projectService.updateProject(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable Long id){
-        Long userId = 1L;
-        projectService.softDelete(id, userId);
+        projectService.softDelete(id);
         return ResponseEntity.noContent().build();
     }
 }

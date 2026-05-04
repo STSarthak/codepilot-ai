@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -37,6 +38,13 @@ public class GlobalExceptionHandler {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Input Validation Failed", errors);
         log.error(apiError.toString(), ex);
         return ResponseEntity.status(apiError.status()).body(apiError);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ApiError> handleNoSuchElementError(NoSuchElementException ex){
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getMessage());
+        log.error(apiError.toString(),ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
     }
 
 }
