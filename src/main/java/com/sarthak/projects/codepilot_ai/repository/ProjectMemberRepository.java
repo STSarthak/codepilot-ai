@@ -24,5 +24,10 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Pr
             """)
     Optional<ProjectRole> findRoleByProjectIdAndUserId(@Param("id") Long projectId, @Param("userId") Long userId);
 
-    int countProjectOwnedByUser(Long userId);
+    @Query("""
+            SELECT COUNT(pm) FROM ProjectMember pm
+            WHERE pm.id.userId = :userId
+            AND pm.projectRole = com.sarthak.projects.codepilot_ai.enums.ProjectRole.OWNER
+            """)
+    int countProjectOwnedByUser(@Param("userId") Long userId);
 }

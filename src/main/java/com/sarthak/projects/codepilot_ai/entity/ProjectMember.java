@@ -32,6 +32,6 @@ public class ProjectMember {
     @Enumerated(EnumType.STRING)
     ProjectRole projectRole;
 
-    Instant invtedAt;
+    Instant invitedAt;
     Instant acceptedAt;
 }

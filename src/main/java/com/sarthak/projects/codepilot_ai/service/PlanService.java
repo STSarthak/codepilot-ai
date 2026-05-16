@@ -1,8 +1,9 @@
 package com.sarthak.projects.codepilot_ai.service;
 
 import com.sarthak.projects.codepilot_ai.dto.subscription.PlanResponse;
-import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 public interface PlanService {
-    PlanResponse getAllActivePlans();
+    List<PlanResponse> getAllActivePlans();
 }

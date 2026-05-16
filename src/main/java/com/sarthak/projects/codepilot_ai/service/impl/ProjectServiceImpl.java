@@ -15,6 +15,7 @@ import com.sarthak.projects.codepilot_ai.repository.ProjectRepository;
 import com.sarthak.projects.codepilot_ai.repository.UserRepository;
 import com.sarthak.projects.codepilot_ai.security.AuthUtil;
 import com.sarthak.projects.codepilot_ai.service.ProjectService;
+import com.sarthak.projects.codepilot_ai.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +38,13 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectMapper projectMapper;
     ProjectMemberRepository projectMemberRepository;
     AuthUtil authUtil;
+    SubscriptionService subscriptionService;
 
     @Override
     public List<ProjectSummaryResponse> getUserProject() {
         Long userId = authUtil.getCurrentUserId();
-        return projectRepository.findAllAccessibleProjectsByUser(userId)
-                .stream()
-                .map(projectMapper::toProjectSummaryResponse)
-                .toList();
+        var projects = projectRepository.findAllAccessibleProjectsByUser(userId);
+        return projectMapper.toListOfProjectSummaryResponse(projects);
     }
 
     @Override
@@ -57,6 +57,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
+        if(!subscriptionService.canCreateNewProject()) {
+            throw new BadRequestException("User cannot create a New project with current Plan, Upgrade plan now.");
+        }
+
         Long userId = authUtil.getCurrentUserId();
 
         User owner = userRepository.getReferenceById(userId);
@@ -72,7 +76,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .projectRole(ProjectRole.OWNER)
                 .user(owner)
                 .project(project)
-                .invtedAt(Instant.now())
+                .invitedAt(Instant.now())
                 .acceptedAt(Instant.now())
                 .id(projectMemberId)
                 .build();
@@ -104,6 +108,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project getAccessibleProjectById(Long id, Long userId){
-        return projectRepository.findUserProjectById(userId,id).orElseThrow(() -> new BadRequestException("Not found"));
+        return projectRepository.findUserProjectById(userId,id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
     }
 }
