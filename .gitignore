@@ -38,3 +38,7 @@ out/
 .vscode/
 /.gradle-user-home/wrapper/dists/gradle-9.4.1-bin/arn2x92ynaizyzdaamcbpbhtj/gradle-9.4.1-bin.zip.lck
 /.gradle-user-home/wrapper/dists/gradle-9.4.1-bin/arn2x92ynaizyzdaamcbpbhtj/gradle-9.4.1-bin.zip.part
+
+### Environment Variables ###
+.env
+
