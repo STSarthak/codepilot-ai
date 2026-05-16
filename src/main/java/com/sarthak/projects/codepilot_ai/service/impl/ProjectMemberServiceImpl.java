@@ -71,7 +71,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .project(project)
                 .user(invitee)
                 .projectRole(request.role())
-                .invtedAt(Instant.now())
+                .invitedAt(Instant.now())
                 .build();
 
         projectMemberRepository.save(projectMember);

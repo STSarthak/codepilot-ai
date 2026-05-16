@@ -29,6 +29,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    implementation 'com.stripe:stripe-java:32.1.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
