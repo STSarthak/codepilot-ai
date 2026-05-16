@@ -32,3 +32,14 @@ spring:
         format-sql: true
         jdbc:
           time_zone: Asia/Kolkata
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+stripe:
+  api:
+    secret: ${STRIPE_SECRET_KEY}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET_KEY}
+
+client.url: http://localhost:8080

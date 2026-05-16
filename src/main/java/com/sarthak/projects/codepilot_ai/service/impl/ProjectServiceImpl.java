@@ -8,16 +8,20 @@ import com.sarthak.projects.codepilot_ai.entity.ProjectMember;
 import com.sarthak.projects.codepilot_ai.entity.ProjectMemberId;
 import com.sarthak.projects.codepilot_ai.entity.User;
 import com.sarthak.projects.codepilot_ai.enums.ProjectRole;
+import com.sarthak.projects.codepilot_ai.error.BadRequestException;
 import com.sarthak.projects.codepilot_ai.error.ResourceNotFoundException;
 import com.sarthak.projects.codepilot_ai.repository.ProjectMemberRepository;
 import com.sarthak.projects.codepilot_ai.repository.ProjectRepository;
 import com.sarthak.projects.codepilot_ai.repository.UserRepository;
+import com.sarthak.projects.codepilot_ai.security.AuthUtil;
 import com.sarthak.projects.codepilot_ai.service.ProjectService;
+import com.sarthak.projects.codepilot_ai.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import com.sarthak.projects.codepilot_ai.mapper.ProjectMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,27 +37,33 @@ public class ProjectServiceImpl implements ProjectService {
     UserRepository userRepository;
     ProjectMapper projectMapper;
     ProjectMemberRepository projectMemberRepository;
+    AuthUtil authUtil;
+    SubscriptionService subscriptionService;
 
     @Override
-    public List<ProjectSummaryResponse> getUserProject(Long userId) {
-        return projectRepository.findAllAccessibleProjectsByUser(userId)
-                .stream()
-                .map(projectMapper::toProjectSummaryResponse)
-                .toList();
+    public List<ProjectSummaryResponse> getUserProject() {
+        Long userId = authUtil.getCurrentUserId();
+        var projects = projectRepository.findAllAccessibleProjectsByUser(userId);
+        return projectMapper.toListOfProjectSummaryResponse(projects);
     }
 
     @Override
-    public ProjectResponse getProjectById(Long id, Long userId) {
-        Project project = getAccessibleProjectById(id,userId);
+    @PreAuthorize("@security.canViewProject(#projectId)")
+    public ProjectResponse getProjectById(Long projectId) {
+        Long userId = authUtil.getCurrentUserId();
+        Project project = getAccessibleProjectById(projectId, userId);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
-    public ProjectResponse createProject(ProjectRequest request, Long userId) {
+    public ProjectResponse createProject(ProjectRequest request) {
+        if(!subscriptionService.canCreateNewProject()) {
+            throw new BadRequestException("User cannot create a New project with current Plan, Upgrade plan now.");
+        }
 
-        User owner = userRepository.findById(userId).orElseThrow(
-                () -> new ResourceNotFoundException("User", userId.toString())
-        );
+        Long userId = authUtil.getCurrentUserId();
+
+        User owner = userRepository.getReferenceById(userId);
 
         Project project = Project.builder()
                         .name(request.name())
@@ -66,7 +76,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .projectRole(ProjectRole.OWNER)
                 .user(owner)
                 .project(project)
-                .invtedAt(Instant.now())
+                .invitedAt(Instant.now())
                 .acceptedAt(Instant.now())
                 .id(projectMemberId)
                 .build();
@@ -76,9 +86,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
+    @PreAuthorize("@security.canEditProject(#projectId)")
+    public ProjectResponse updateProject(Long projectId, ProjectRequest request) {
+        Long userId = authUtil.getCurrentUserId();
 
-        Project project = getAccessibleProjectById(id,userId);
+        Project project = getAccessibleProjectById(projectId, userId);
 
         project.setName(request.name());
         project = projectRepository.save(project);
@@ -86,14 +98,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void softDelete(Long id, Long userId) {
-        Project project = getAccessibleProjectById(id,userId);
+    @PreAuthorize("@security.canDeleteProject(#projectId)")
+    public void softDelete(Long projectId) {
+        Long userId = authUtil.getCurrentUserId();
+        Project project = getAccessibleProjectById(projectId, userId);
 
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
     }
 
     public Project getAccessibleProjectById(Long id, Long userId){
-        return projectRepository.findUserProjectById(userId,id).orElseThrow();
+        return projectRepository.findUserProjectById(userId,id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
     }
 }
