@@ -1,8 +1,10 @@
 package com.sarthak.projects.codepilot_ai.controller;
 
+import com.sarthak.projects.codepilot_ai.dto.deploy.DeployResponse;
 import com.sarthak.projects.codepilot_ai.dto.project.ProjectRequest;
 import com.sarthak.projects.codepilot_ai.dto.project.ProjectResponse;
 import com.sarthak.projects.codepilot_ai.dto.project.ProjectSummaryResponse;
+import com.sarthak.projects.codepilot_ai.service.DeploymentService;
 import com.sarthak.projects.codepilot_ai.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final DeploymentService deploymentService;
 
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProject(){
@@ -43,5 +46,10 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProject(@PathVariable Long id){
         projectService.softDelete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/deploy")
+    public ResponseEntity<DeployResponse> deployProject(@PathVariable Long id){
+        return ResponseEntity.ok(deploymentService.deploy(id));
     }
 }

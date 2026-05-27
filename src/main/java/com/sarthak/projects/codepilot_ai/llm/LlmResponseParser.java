@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class LlmResponseParser {
 
     private static final Pattern GENERIC_TAG_PATTERN = Pattern.compile(
-            "(<(message|file|tool)([^>]*)>)([\\s\\S]*?)(</\\2>)",
+            "(<(cp_message|cp_file|cp_tool)([^>]*)>)([\\s\\S]*?)(</\\2>)",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
     );
 
@@ -44,12 +44,12 @@ public class LlmResponseParser {
                     .sequenceOrder(orderCounter++);
 
             switch (tagName) {
-                case "message" -> builder.type(ChatEventType.MESSAGE);
-                case "file" -> {
+                case "cp_message" -> builder.type(ChatEventType.MESSAGE);
+                case "cp_file" -> {
                     builder.type(ChatEventType.FILE_EDIT);
                     builder.filePath(attrMap.get("path"));
                 }
-                case "tool" -> {
+                case "cp_tool" -> {
                     builder.type(ChatEventType.TOOL_LOG);
                     builder.metadata(attrMap.get("args"));
                 }

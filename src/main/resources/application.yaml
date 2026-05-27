@@ -34,6 +34,11 @@ spring:
         jdbc:
           time_zone: Asia/Kolkata
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 
