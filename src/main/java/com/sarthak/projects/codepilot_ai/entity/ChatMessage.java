@@ -1,21 +1,47 @@
 package com.sarthak.projects.codepilot_ai.entity;
 
 import com.sarthak.projects.codepilot_ai.enums.MessageRole;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.List;
 
+@Entity
+@Table(name = "chat_messages")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class ChatMessage {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false),
+            @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    })
     ChatSession chatSession;
-    String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     MessageRole role;
-    String toolCalls;
-    Integer tokenUsed;
+
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("sequenceOrder ASC")
+    List<ChatEvent> events;
+
+    @Column(columnDefinition = "text")
+    String content;
+
+    Integer tokensUsed = 0;
+
+    @CreationTimestamp
     Instant createdAt;
 }

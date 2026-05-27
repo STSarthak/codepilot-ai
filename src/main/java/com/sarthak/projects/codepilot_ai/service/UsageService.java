@@ -2,10 +2,13 @@ package com.sarthak.projects.codepilot_ai.service;
 
 import com.sarthak.projects.codepilot_ai.dto.subscription.PlanLimitResponse;
 import com.sarthak.projects.codepilot_ai.dto.subscription.UsageTodayResponse;
-import org.jspecify.annotations.Nullable;
 
 public interface UsageService {
-    UsageTodayResponse getTodayUsageOfUser(Long userId);
+    UsageTodayResponse getTodayUsageOfUser();
 
-    PlanLimitResponse getCurrentSubscriptionLimitsOfUser(Long userId);
+    PlanLimitResponse getCurrentSubscriptionLimitsOfUser();
+
+    void recordTokenUsage(Long userId, int actualTokens);
+
+    void checkDailyTokensUsage();
 }

@@ -1,13 +1,12 @@
 package com.sarthak.projects.codepilot_ai.service;
 
 import com.sarthak.projects.codepilot_ai.dto.project.FileContentResponse;
-import com.sarthak.projects.codepilot_ai.dto.project.FileNode;
-import org.jspecify.annotations.Nullable;
-
-import java.util.List;
+import com.sarthak.projects.codepilot_ai.dto.project.FileTreeResponse;
 
 public interface FileService {
-    List<FileNode> getFileTree(Long projectId, Long userId);
+    FileTreeResponse getFileTree(Long projectId);
 
-    FileContentResponse getFileContent(Long projectId, String path, Long userId);
+    FileContentResponse getFileContent(Long projectId, String path);
+
+    void saveFile(Long projectId, String filePath, String fileContent);
 }
