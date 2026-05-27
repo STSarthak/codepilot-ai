@@ -15,6 +15,7 @@ import com.sarthak.projects.codepilot_ai.repository.ProjectRepository;
 import com.sarthak.projects.codepilot_ai.repository.UserRepository;
 import com.sarthak.projects.codepilot_ai.security.AuthUtil;
 import com.sarthak.projects.codepilot_ai.service.ProjectService;
+import com.sarthak.projects.codepilot_ai.service.ProjectTemplateService;
 import com.sarthak.projects.codepilot_ai.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -39,12 +40,26 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectMemberRepository projectMemberRepository;
     AuthUtil authUtil;
     SubscriptionService subscriptionService;
+    ProjectTemplateService projectTemplateService;
 
     @Override
     public List<ProjectSummaryResponse> getUserProject() {
         Long userId = authUtil.getCurrentUserId();
-        var projects = projectRepository.findAllAccessibleProjectsByUser(userId);
-        return projectMapper.toListOfProjectSummaryResponse(projects);
+        return projectRepository.findAllAccessibleByUser(userId)
+                .stream()
+                .map(projectWithRole -> projectMapper.toProjectSummaryResponse(
+                        projectWithRole.getProject(),
+                        projectWithRole.getRole()))
+                .toList();
+    }
+
+    @Override
+    @PreAuthorize("@security.canViewProject(#projectId)")
+    public ProjectSummaryResponse getUserProjectById(Long projectId) {
+        Long userId = authUtil.getCurrentUserId();
+        var projectWithRole = projectRepository.findAccessibleProjectByIdWithRole(projectId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", projectId.toString()));
+        return projectMapper.toProjectSummaryResponse(projectWithRole.getProject(), projectWithRole.getRole());
     }
 
     @Override
@@ -82,6 +97,8 @@ public class ProjectServiceImpl implements ProjectService {
                 .build();
         projectMemberRepository.save(projectMember);
 
+        projectTemplateService.initializeProjectFromTemplate(project.getId());
+
         return projectMapper.toProjectResponse(project);
     }
 
@@ -108,7 +125,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project getAccessibleProjectById(Long id, Long userId){
-        return projectRepository.findUserProjectById(userId,id)
+        return projectRepository.findAccessibleProjectById(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
     }
 }

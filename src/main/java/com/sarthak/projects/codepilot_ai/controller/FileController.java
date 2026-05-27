@@ -1,16 +1,11 @@
 package com.sarthak.projects.codepilot_ai.controller;
 
 import com.sarthak.projects.codepilot_ai.dto.project.FileContentResponse;
-import com.sarthak.projects.codepilot_ai.dto.project.FileNode;
+import com.sarthak.projects.codepilot_ai.dto.project.FileTreeResponse;
 import com.sarthak.projects.codepilot_ai.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,17 +15,15 @@ public class FileController {
     private final FileService fileService;
 
     @GetMapping
-    public ResponseEntity<List<FileNode>> getFileTree(@PathVariable Long projectId){
-        Long userId =1L;
-        return ResponseEntity.ok(fileService.getFileTree(projectId, userId));
+    public ResponseEntity<FileTreeResponse> getFileTree(@PathVariable Long projectId){
+        return ResponseEntity.ok(fileService.getFileTree(projectId));
     }
 
-    @GetMapping("/{*path}")
+    @GetMapping("/content")
     public ResponseEntity<FileContentResponse> getFile(
             @PathVariable Long projectId,
-            @PathVariable String path
+            @RequestParam String path
     ){
-        Long userId =1L;
-        return ResponseEntity.ok(fileService.getFileContent(projectId, path, userId));
+        return ResponseEntity.ok(fileService.getFileContent(projectId, path));
     }
 }
