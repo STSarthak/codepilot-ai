@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: account-service
+              uri: lb://account-service
+              predicates:
+                - Path=/api/auth/**,/api/plans,/api/me/subscription,/api/payments/**,/webhooks/payment
+            - id: workspace-service
+              uri: lb://workspace-service
+              predicates:
+                - Path=/api/projects/**
+            - id: intelligence-service
+              uri: lb://intelligence-service
+              predicates:
+                - Path=/api/chat/**,/api/usage/**
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+app:
+  security:
+    public-routes:
+      - /api/auth/**
+      - /webhooks/**
+      - /actuator/**
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}

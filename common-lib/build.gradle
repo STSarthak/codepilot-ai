@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api 'org.springframework.boot:spring-boot-starter-webmvc'
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    api "io.jsonwebtoken:jjwt-api:${rootProject.ext.jjwtVersion}"
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${rootProject.ext.jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${rootProject.ext.jjwtVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+}

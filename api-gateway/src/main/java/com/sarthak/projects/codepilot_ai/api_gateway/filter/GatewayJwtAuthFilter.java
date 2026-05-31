@@ -1,0 +1,73 @@
+package com.sarthak.projects.codepilot_ai.api_gateway.filter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.sarthak.projects.codepilot_ai.api_gateway.config.SecurityProperties;
+import com.sarthak.projects.codepilot_ai.api_gateway.error.ApiError;
+import com.sarthak.projects.codepilot_ai.api_gateway.service.JwtGatewayService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class GatewayJwtAuthFilter implements GlobalFilter, Ordered {
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final SecurityProperties securityProperties;
+    private final JwtGatewayService jwtGatewayService;
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getPath();
+
+        boolean isPublic = securityProperties.getPublicRoutes().stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        if (isPublic) {
+            return chain.filter(exchange);
+        }
+
+        String authHeader = request.getHeaders().getFirst("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return sendErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
+        }
+
+        try {
+            jwtGatewayService.validateToken(authHeader.substring(7));
+            return chain.filter(exchange);
+        } catch (Exception e) {
+            log.warn("JWT validation failed for {}: {}", path, e.getMessage());
+            return sendErrorResponse(exchange, HttpStatus.UNAUTHORIZED, e.getMessage());
+        }
+    }
+
+    private Mono<Void> sendErrorResponse(ServerWebExchange exchange, HttpStatus status, String message) {
+        exchange.getResponse().setStatusCode(status);
+        exchange.getResponse().getHeaders().add("Content-Type", "application/json");
+        try {
+            byte[] bytes = objectMapper.writeValueAsBytes(new ApiError(status, message));
+            DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+            return exchange.getResponse().writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            return exchange.getResponse().setComplete();
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        return -1;
+    }
+}
