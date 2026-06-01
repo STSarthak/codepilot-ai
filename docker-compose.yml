@@ -13,6 +13,7 @@ services:
       - "9000:5432"
     volumes:
       - D:\ProgramFiles\workspace-spring-tool-suite-4-4.23.1.RELEASE\CodePilotAi\codepilot-ai-db:/var/lib/postgresql
+      - ./docker/postgres/init-microservice-dbs.sql:/docker-entrypoint-initdb.d/init-microservice-dbs.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U testUser -d testDB"]
       interval: 10s
@@ -34,5 +35,29 @@ services:
       - codepilot-minio-data:/data
     restart: unless-stopped
 
+  kafka:
+    image: confluentinc/confluent-local:7.5.0
+    container_name: codepilot-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: VbWFu6TX9UqU3XIvWltj6A
+    ports:
+      - "9092:29092"
+    volumes:
+      - codepilot-kafka-data:/var/lib/kafka/data
+    restart: unless-stopped
+
 volumes:
   codepilot-minio-data:
+  codepilot-kafka-data:
