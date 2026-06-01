@@ -1,9 +1,0 @@
-rootProject.name = 'codepilot-ai'
-
-include 'common-lib'
-include 'account-service'
-include 'workspace-service'
-include 'intelligence-service'
-include 'api-gateway'
-include 'config-service'
-include 'discovery-service'
